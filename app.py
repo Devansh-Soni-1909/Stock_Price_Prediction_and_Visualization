@@ -1,7 +1,9 @@
 
 
 
-# # 3rd 
+
+
+#  latest
 
 # import streamlit as st
 # import numpy as np
@@ -10,6 +12,11 @@
 # import yfinance as yf
 # from keras.models import load_model
 # from sklearn.preprocessing import MinMaxScaler
+# import requests  # For real-time news API
+# from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
+# from sklearn.metrics import r2_score
+# import numpy as np
+
 
 # # A placeholder for credentials (for simplicity, you can use hardcoded ones)
 # VALID_USERNAME = "user"
@@ -20,8 +27,8 @@
 #     st.title('Stock Trend Prediction')
 
 #     # Set the date range
-#     start = '2018-12-31'
-#     end = '2023-06-15'
+#     start = '2018-05-12'
+#     end = '2024-04-12'
 
 #     # Stock ticker input from user
 #     user_input = st.text_input('Enter Stock Ticker', 'AAPL', key='ticker_input')
@@ -31,7 +38,7 @@
 #         df = yf.download(user_input, start=start, end=end)
 
 #         # Display subheader and data description
-#         st.subheader('Data from 2010 - 2019')
+#         st.subheader('Data from 2018 - 2024')
 #         st.write(df.describe())
 
 #         # Visualizations
@@ -91,6 +98,19 @@
 #         y_predicted = y_predicted * scale_factor
 #         y_test = y_test * scale_factor
 
+#         # Calculate MSE, RMSE, and MAPE ,R-squared value
+#         mse = mean_squared_error(y_test, y_predicted)
+#         rmse = np.sqrt(mse)
+#         mape = mean_absolute_percentage_error(y_test, y_predicted) * 100
+#         r2 = r2_score(y_test, y_predicted)
+
+#         # Display the results in Streamlit
+#         st.subheader('Model Performance Metrics')
+#         st.write(f"Mean Squared Error (MSE): {mse}")
+#         st.write(f"Root Mean Squared Error (RMSE): {rmse}")
+#         st.write(f"Mean Absolute Percentage Error (MAPE): {mape}%")
+#         st.write(f"R-squared (R²): {r2}")
+
 #         # Final graph
 #         st.subheader('Predictions vs Original')
 #         fig2 = plt.figure(figsize=(12, 6))
@@ -104,19 +124,41 @@
 #     except Exception as e:
 #         st.error(f"Error fetching data for ticker {user_input}: {e}")
 
-# # Function to show stock-related articles (placeholder)
+# # Function to fetch and display real-time stock news
+# def fetch_stock_news():
+#     st.title("Real-Time Stock News")
+    
+#     # Fetch news using an API (e.g., NewsAPI.org)
+#     api_key = "9bfa7f6c6dda446eae2434fb6fa5c4f0"
+#     url = f"https://newsapi.org/v2/everything?q=stocks&apiKey={api_key}"
+    
+#     try:
+#         response = requests.get(url)
+#         news_data = response.json()
+#         articles = news_data['articles']
+
+#         # Display news articles
+#         for article in articles[:5]:
+#             st.subheader(article['title'])
+#             st.write(article['description'])
+#             st.write(f"[Read more]({article['url']})")
+    
+#     except Exception as e:
+#         st.error(f"Error fetching stock news: {e}")
+
+# # Function to show stock-related articles and a list of stock tickers
 # def stock_articles():
 #     st.title("Stock Market News and Insights")
 
-#     # Placeholder articles
-#     st.subheader("1. How the stock market behaves during recessions")
-#     st.write("Summary of how stock prices are impacted during different stages of a recession...")
+#     st.subheader("Latest Stock Market News")
+#     fetch_stock_news()  # Fetch real-time news
 
-#     st.subheader("2. Technology stocks to watch in 2024")
-#     st.write("A list of tech stocks that could experience growth in 2024...")
-
-#     st.subheader("3. Expert tips on stock diversification")
-#     st.write("Insights from stock market experts on the importance of a diversified portfolio...")
+#     st.subheader("List of Company Stock Tickers")
+    
+#     # Fetch a list of major stock tickers using yfinance
+#     tickers = yf.Tickers('AAPL MSFT TSLA GOOGL AMZN')
+#     ticker_list = tickers.symbols
+#     st.write(ticker_list)
 
 # # Login Page Styling
 # st.markdown("""
@@ -191,9 +233,10 @@ import matplotlib.pyplot as plt
 import yfinance as yf
 from keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
-import requests  # For real-time news API
+import requests
+from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, r2_score
 
-# A placeholder for credentials (for simplicity, you can use hardcoded ones)
+# Placeholder for credentials (for simplicity, you can use hardcoded ones)
 VALID_USERNAME = "user"
 VALID_PASSWORD = "pass"
 
@@ -202,18 +245,21 @@ def show_stock_prediction(username):
     st.title('Stock Trend Prediction')
 
     # Set the date range
-    start = '2018-12-31'
-    end = '2023-06-15'
+    start = '2018-05-12'
+    end = '2024-04-12'
 
     # Stock ticker input from user
     user_input = st.text_input('Enter Stock Ticker', 'AAPL', key='ticker_input')
+
+    # Number of future days to predict
+    forecast_days = st.number_input('Enter the number of days to forecast', min_value=1, max_value=365, value=30)
 
     try:
         # Fetch data from Yahoo Finance using yfinance
         df = yf.download(user_input, start=start, end=end)
 
         # Display subheader and data description
-        st.subheader('Data from 2010 - 2019')
+        st.subheader('Data from 2018 - 2024')
         st.write(df.describe())
 
         # Visualizations
@@ -272,6 +318,53 @@ def show_stock_prediction(username):
         scale_factor = 1 / scaler.scale_[0]
         y_predicted = y_predicted * scale_factor
         y_test = y_test * scale_factor
+
+        # Calculate MSE, RMSE, and MAPE, R-squared value
+        mse = mean_squared_error(y_test, y_predicted)
+        rmse = np.sqrt(mse)
+        mape = mean_absolute_percentage_error(y_test, y_predicted) * 100
+        r2 = r2_score(y_test, y_predicted)
+
+        # Display the results in Streamlit
+        st.subheader('Model Performance Metrics')
+        st.write(f"Mean Squared Error (MSE): {mse}")
+        st.write(f"Root Mean Squared Error (RMSE): {rmse}")
+        st.write(f"Mean Absolute Percentage Error (MAPE): {mape}%")
+        st.write(f"R-squared (R²): {r2}")
+
+        # Verify if forecasting is done correctly
+        st.subheader('Forecasting Verification')
+        if r2 > 0.9:
+            st.success('Forecasting is done correctly with high accuracy (R² > 0.9).')
+        elif 0.7 < r2 <= 0.9:
+            st.warning('Forecasting is reasonable (0.7 < R² <= 0.9), but can be improved.')
+        else:
+            st.error('Forecasting may not be accurate (R² <= 0.7), further improvement is needed.')
+
+        # Predict future values for the next 'x' days
+        last_100_days = input_data[-100:]
+        last_100_days = np.reshape(last_100_days, (1, last_100_days.shape[0], 1))  # Ensure it matches model input shape
+        
+        predicted_future = []
+        for _ in range(forecast_days):
+            future_pred = model.predict(last_100_days)
+            predicted_future.append(future_pred[0, 0])
+            # Update the last 100 days to include the new prediction
+            future_pred_reshaped = np.reshape(future_pred, (1, 1, 1))  # Ensure future_pred is reshaped correctly
+            last_100_days = np.append(last_100_days[:, 1:, :], future_pred_reshaped, axis=1)
+        
+        predicted_future = np.array(predicted_future)
+        predicted_future = predicted_future * scale_factor
+        predicted_future = predicted_future * scale_factor
+
+        # Display future predictions
+        st.subheader(f'Forecast for the Next {forecast_days} Days')
+        fig3 = plt.figure(figsize=(12, 6))
+        plt.plot(np.arange(1, forecast_days+1), predicted_future, label='Forecasted Price')
+        plt.xlabel('Days')
+        plt.ylabel('Price')
+        plt.legend()
+        st.pyplot(fig3)
 
         # Final graph
         st.subheader('Predictions vs Original')
@@ -373,17 +466,18 @@ if 'logged_in' not in st.session_state:
 
 # If logged in, display main content, otherwise show login page
 if st.session_state['logged_in']:
-    # Sidebar for navigation
-    st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", ["Stock Prediction", "Stock Articles", "Logout"])
+    selected_page = st.sidebar.selectbox("Select Page", ("Stock Prediction", "Stock Market News", "Logout"))
 
-    if page == "Stock Prediction":
-        show_stock_prediction(username)  # Run the stock prediction function
-    elif page == "Stock Articles":
-        stock_articles()  # Display stock-related articles
-    elif page == "Logout":
-        st.session_state['logged_in'] = False  # Log out
+    if selected_page == "Stock Prediction":
+        show_stock_prediction(username)
+    elif selected_page == "Stock Market News":
+        stock_articles()
+    elif selected_page == "Logout":
+        st.session_state['logged_in'] = False
+        st.success("You have logged out successfully.")
 else:
-    pass  # Run the login function
+    st.title("Please log in to access the stock prediction and news features.")
+
+
 
 
